@@ -1,0 +1,33 @@
+body{
+    padding-top: 16px;
+}
+.bubble{
+    background-color: gainsboro;
+    border-radius: 2px;
+}
+            
+.bubblyRedBubble{
+    background-color: #E57373;
+    border-radius: 2px;
+}
+            
+.invisible{
+    opacity: 0;
+}
+            
+.textarea {
+    border: 1px solid gray;
+    border-radius: 4px!important;
+    height: 100px;
+    overflow: auto;
+    padding: 2px;
+    position: absolute;
+    background-color:white;
+    width: 100%;
+}
+            
+.textarea:focus{
+    outline: none;
+    border-color: #9ecaed;
+    box-shadow: 0 0 4px #9ecaed;
+}
