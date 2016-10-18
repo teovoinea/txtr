@@ -1,4 +1,4 @@
-<!DOCTYPE HTML>
+﻿<!DOCTYPE HTML>
 <html>
     <head>
         <meta charset="UTF-8"/>
@@ -17,6 +17,9 @@
         <!-- Latest compiled and minified JavaScript -->
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
         
+        <!-- Csv parsing library-->
+        <script src="jquery-csv.js" type="text/javascript"></script>
+
         <link rel="stylesheet" href="WowSoStylish.css">
         <script src="OhJavascript.js" type="text/javascript"></script>
     </head>
@@ -32,7 +35,8 @@
                           <div contenteditable="true" class="textarea" id="raw" style="opacity:0;">hi {{name}}! This is a demo of our {{dank}} platform. It will cost {{price}}</div>
                           </div>
                           <br>
-                          <a href="http://instantcena.com"><button type="button" class="btn btn-success" style="width:100%;">Press That Success Button</button></a>
+                          <button type="button" class="btn btn-success" style="width:100%;" onclick="getText()">Press That Success Button</button>
+                          <form><input type="file" id="files" accept=".csv" name="files[]" style="width:100%;"></form>
                       </div>
                     </div>
                 </div>
