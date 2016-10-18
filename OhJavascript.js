@@ -36,6 +36,7 @@ function handleFileSelect(evt) {
 
 function getText() {
     var input = $(".textarea#converted").text();
+    return input;
     console.log("input:"+input);
 }
 
@@ -52,13 +53,57 @@ function getCSV(file){
 }
 
 function parseInput(data) {
+    var headers = [];
+    var userInput = getText();
     $.each(data, function (index, value) {
+        if(index==0){
+            if(!checkHeaders(value, userInput))
+            {
+                alert("User input does not match csv headers");
+                return false;
+            }
+            headers = value;
+        }
         if (index > 0) {
-           console.log(value);
+            console.log(value);
+            replacePlaceHolders(headers, value, userInput);
+            //makeApiCall(replacePlaceHolders(headers,data,userInput));
         }
     });
 }
+/*
+function getHeaderIndex(headers, userInput) {
+    var index = [];
+    $.each(headers, function (index, value) {
+        index.push(indexOf(value));
+    });
+}*/
 
-function replacePlaceholders(csvInput, userInput) {
+function makeApiCall(){
 
+}
+
+function replacePlaceHolders(header, csvRow, userInput) {
+    outputRow = userInput;
+    $.each(csvRow, function(index,value){
+        var tempString = "{{" + header[index] + "}}";
+        outputRow = outputRow.replace(tempString, value);
+    });
+    console.log(outputRow);
+}
+
+function checkHeaders(csvRow,userInput) {
+    var allClear = true;
+    var splitLeft = userInput.split("{{").length-1;
+    var splitRight = userInput.split("}}").length-1;
+    if (splitLeft != csvRow.length ||splitRight  != csvRow.length) {
+        allClear = false;
+    }
+    $.each(csvRow,function(index,value){
+        var tempString = "{{"+value+"}}";
+        if(!userInput.includes(tempString)){
+            allClear = false;
+        }
+    });
+    return allClear;
 }
