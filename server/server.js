@@ -6,8 +6,13 @@ var upload = multer();
 var app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(function(req, res, next) {
+	res.header("Access-Control-Allow-Origin", "*");
+	//res.header("Access-Control-Allow-Origin", "Origin, X-Requested-With, Content-Type, Accept");
+	next();
+});
 
-app.get('/*', function(req, res) {
+app.get('/*', function(req, res, next) {
 	console.log('GET on /');
 	res.send('Wassup fam');
 });

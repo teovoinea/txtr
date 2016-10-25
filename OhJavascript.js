@@ -1,4 +1,5 @@
 var availableTags= ["name", "price", "appointment-time", "dank"];
+var serverUrl = 'http://localhost:8001/'
 $(document).ready(function(){ 
     $("#raw").focusin(function(){
         document.getElementById("raw").style.opacity = 100;
@@ -38,6 +39,12 @@ function getText() {
     var input = $(".textarea#converted").text();
     return input;
     console.log("input:"+input);
+}
+
+function testServer() {
+	exampleGetRequest();
+	examplePostRequest();
+	//console.log('we clicked fam');
 }
 
 function getCSV(file){
@@ -81,6 +88,36 @@ function getHeaderIndex(headers, userInput) {
 
 function makeApiCall(){
 
+}
+
+function exampleGetRequest(){
+	$.ajax({
+		'method' : 'GET',
+		'url' : serverUrl + 'user_info',
+		'header' : 'application/json'
+	}).then(function successCallback(res){
+		console.log('Successfully received' + res + 'from the server')
+	}, function errorCallback(res) {
+		console.log('Error: ' + res)
+	});
+}
+
+function examplePostRequest(){
+	var testObject = {
+		'name' : 'This is some arbitrary JSON object',
+		'info' : 'Can contain anything'
+	};
+	console.log('Sending: ' + testObject + ' to the server')
+	$.ajax({
+		'method' : 'POST',
+		'url' : serverUrl + 'upload_csv',
+		'header' : 'application/json',
+		'data' : testObject
+	}).then(function successCallback(res){
+		console.log('Successfully received' + res.name + 'from the server')	
+	}, function errorCallback(res) {
+		console.log('Error: ' + res.data)
+	});
 }
 
 function replacePlaceHolders(header, csvRow, userInput) {
