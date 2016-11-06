@@ -9,6 +9,58 @@ $(document).ready(function(){
         document.getElementById("raw").style.opacity = 0;
     });
     $("#files").bind('change', handleFileSelect);
+
+    var obj = $(".box");
+    var counter = 0;
+    obj.on('dragenter', function (e) 
+    {
+        console.log("dragenter");
+        e.stopPropagation();
+        e.preventDefault();
+        counter++;
+        $(this).switchClass('box','box_is_dragover');
+    });
+    obj.on('dragover', function (e) 
+    {
+        e.stopPropagation();
+        e.preventDefault();
+    });
+    obj.on('dragleave', function(e)
+    {
+        console.log("dragleave");
+        e.preventDefault();
+        counter--
+        if (counter == 0)
+        {
+            $(this).switchClass('box_is_dragover', 'box');
+        }      
+    });
+    obj.on('drop', function (e) 
+    {
+ 
+        $(this).switchClass('box_is_dragover','box');
+        e.preventDefault();
+        var files = e.originalEvent.dataTransfer.files;
+ 
+        //We need to send dropped files to Server
+        handleFileUpload(files,obj);
+    });
+    $(document).on('dragenter', function (e) 
+    {
+        e.stopPropagation();
+        e.preventDefault();
+    });
+    $(document).on('dragover', function (e) 
+    {
+        e.stopPropagation();
+        e.preventDefault();
+    });
+    $(document).on('drop', function (e) 
+    {
+        e.stopPropagation();
+        e.preventDefault();
+    });
+ 
 });
 
 function prettifyPLZ(someDopeText) {
@@ -143,4 +195,15 @@ function checkHeaders(csvRow,userInput) {
         }
     });
     return allClear;
+}
+
+var isAdvancedUpload = function () {
+    var div = document.createElement('div');
+    return (('draggable' in div) || ('ondragstart' in div && 'ondrop' in div)) && 'FormData' in window && 'FileReader' in window;
+}();
+
+var $form = $('.box');
+
+if (isAdvancedUpload) {
+    $form.addClass('has-advanced-upload');
 }
