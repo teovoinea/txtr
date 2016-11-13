@@ -1,196 +1,164 @@
-var availableTags= ["name", "price", "appointment-time", "dank"];
+var availableTags = ["name", "price", "appointment-time", "dank"];
 var serverUrl = 'http://localhost:8001/'
-$(document).ready(function(){ 
-    $("#raw").focusin(function(){
+$(document).ready(function () {
+    $("#raw").focusin(function () {
         document.getElementById("raw").style.opacity = 100;
-    });        
-    $("#raw").focusout(function(){
+    });
+    $("#raw").focusout(function () {
         $("#converted").html(prettifyPLZ($("#raw").text()));
         document.getElementById("raw").style.opacity = 0;
     });
-    $("#files").bind('change', handleFileSelect);
+    $("#input_file").bind('change', handleFileUpload);
 
     var obj = $(".box");
     var counter = 0;
-    obj.on('dragenter', function (e) 
-    {
-        console.log("dragenter");
+    obj.on('dragenter', function (e) {
         e.stopPropagation();
         e.preventDefault();
         counter++;
-        $(this).switchClass('box','box_is_dragover');
+        $(this).switchClass('box', 'box_is_dragover');
     });
-    obj.on('dragover', function (e) 
-    {
+    obj.on('dragover', function (e) {
         e.stopPropagation();
         e.preventDefault();
     });
-    obj.on('dragleave', function(e)
-    {
-        console.log("dragleave");
+    obj.on('dragleave', function (e) {
         e.preventDefault();
-        counter--
-        if (counter == 0)
-        {
+        counter--;
+        if (counter == 0) {
             $(this).switchClass('box_is_dragover', 'box');
-        }      
+        }
     });
-    obj.on('drop', function (e) 
-    {
- 
-        $(this).switchClass('box_is_dragover','box');
+    obj.on('drop', function (e) {
+        e.stopPropagation();
         e.preventDefault();
-        var files = e.originalEvent.dataTransfer.files;
- 
-        //We need to send dropped files to Server
-        handleFileUpload(files,obj);
+        $(this).switchClass('box_is_dragover', 'box');
+        storeCSV(e.originalEvent.dataTransfer.files);
+        
+        //console.log(csv);
+        //sessionStorage.setItem("csv", csv);
+        //getCSV(sessionStorage.getItem("csv")), getText();
     });
-    $(document).on('dragenter', function (e) 
-    {
+    $(document).on('dragenter', function (e) {
         e.stopPropagation();
         e.preventDefault();
     });
-    $(document).on('dragover', function (e) 
-    {
+    $(document).on('dragover', function (e) {
         e.stopPropagation();
         e.preventDefault();
     });
-    $(document).on('drop', function (e) 
-    {
+    $(document).on('drop', function (e) {
         e.stopPropagation();
         e.preventDefault();
     });
- 
+
 });
+
+function handleFileUpload(e) {
+    storeCSV(e.target.files);
+}
+
+function storeCSV(files)
+{
+    var file = files[0];
+    var reader = new FileReader();
+    reader.readAsText(file);
+    reader.onload = function (event) {
+        var csv = event.target.result;
+        sessionStorage.setItem("csv", csv);
+        console.log(sessionStorage.getItem("csv"));
+    }
+}
 
 function prettifyPLZ(someDopeText) {
     var daUltimateRegex = /{{[a-zA-Z0-9.-]{1,30}}}/g;
     var arrayOfSweetMatches;
-    while(arrayOfSweetMatches = daUltimateRegex.exec(someDopeText)){
-        someDopeText = someDopeText.replace(arrayOfSweetMatches[0], "<span class=\""+gimmeThatColorPLZ(arrayOfSweetMatches[0].slice(2,-2))+"\"><span class=\"invisible\">{{</span>"+ arrayOfSweetMatches[0].slice(2,-2) +"<span class=\"invisible\">}}</span></span>");
+    while (arrayOfSweetMatches = daUltimateRegex.exec(someDopeText)) {
+        someDopeText = someDopeText.replace(arrayOfSweetMatches[0], "<span class=\"" + gimmeThatColorPLZ(arrayOfSweetMatches[0].slice(2, -2)) + "\"><span class=\"invisible\">{{</span>" + arrayOfSweetMatches[0].slice(2, -2) + "<span class=\"invisible\">}}</span></span>");
     }
     return someDopeText;
 }
-            
-function gimmeThatColorPLZ(tagToTryTY){
-    if (availableTags.indexOf(tagToTryTY)!=-1){
+
+function gimmeThatColorPLZ(tagToTryTY) {
+    if (availableTags.indexOf(tagToTryTY) != -1) {
         return "bubble";
     } else {
         return "bubblyRedBubble";
     }
 }
 
-function handleFileSelect(evt) {
-    var csv = evt.target.files;
-    var csv = csv[0];
-    getCSV(csv);
-    getText();
+function validateCSV() {
+    var input_Csv = window.btoa(sessionStorage.getItem("csv"));
+    var input_Text = window.btoa(getText());
+    postInputCsv(input_Csv, input_Text);
 }
 
 function getText() {
     var input = $(".textarea#converted").text();
+    console.log("input:" + input);
     return input;
-    console.log("input:"+input);
 }
 
 function testServer() {
-	exampleGetRequest();
-	examplePostRequest();
-	//console.log('we clicked fam');
+    exampleGetRequest();
+    examplePostRequest();
+    //console.log('we clicked fam');
 }
 
-function getCSV(file){
-    var reader = new FileReader();
-    var data;
-    reader.readAsText(file);
-    reader.onload = function (event) {
-        var csv = event.target.result;
-        data = $.csv.toArrays(csv);
-        //console.log(data);
-        parseInput(data);
-    }
-}
-
-function parseInput(data) {
-    var headers = [];
-    var userInput = getText();
-    $.each(data, function (index, value) {
-        if(index==0){
-            if(!checkHeaders(value, userInput))
-            {
-                alert("User input does not match csv headers");
-                return false;
-            }
-            headers = value;
-        }
-        if (index > 0) {
-            console.log(value);
-            replacePlaceHolders(headers, value, userInput);
-            //makeApiCall(replacePlaceHolders(headers,data,userInput));
-        }
+function postInputCsv(data, text) {
+    console.log('Sending: ' + data + ' to the server')
+    $.ajax({
+        'method': 'POST',
+        'url': serverUrl + 'upload_csv',
+        'header': 'application/json',
+        'data': data,text
+    }).then(function successCallback(res) {
+        console.log('Successfully received' + res.name + 'from the server')
+    }, function errorCallback(res) {
+        console.log('Error: ' + res.data)
     });
 }
-/*
-function getHeaderIndex(headers, userInput) {
-    var index = [];
-    $.each(headers, function (index, value) {
-        index.push(indexOf(value));
+
+function exampleGetRequest() {
+    $.ajax({
+        'method': 'GET',
+        'url': serverUrl + 'user_info',
+        'header': 'application/json'
+    }).then(function successCallback(res) {
+        console.log('Successfully received' + res + 'from the server')
+    }, function errorCallback(res) {
+        console.log('Error: ' + res)
     });
-}*/
-
-function makeApiCall(){
-
 }
 
-function exampleGetRequest(){
-	$.ajax({
-		'method' : 'GET',
-		'url' : serverUrl + 'user_info',
-		'header' : 'application/json'
-	}).then(function successCallback(res){
-		console.log('Successfully received' + res + 'from the server')
-	}, function errorCallback(res) {
-		console.log('Error: ' + res)
-	});
-}
-
-function examplePostRequest(){
-	var testObject = {
-		'name' : 'This is some arbitrary JSON object',
-		'info' : 'Can contain anything'
-	};
-	console.log('Sending: ' + testObject + ' to the server')
-	$.ajax({
-		'method' : 'POST',
-		'url' : serverUrl + 'upload_csv',
-		'header' : 'application/json',
-		'data' : testObject
-	}).then(function successCallback(res){
-		console.log('Successfully received' + res.name + 'from the server')	
-	}, function errorCallback(res) {
-		console.log('Error: ' + res.data)
-	});
-}
-
-function replacePlaceHolders(header, csvRow, userInput) {
-    outputRow = userInput;
-    $.each(csvRow, function(index,value){
-        var tempString = "{{" + header[index] + "}}";
-        outputRow = outputRow.replace(tempString, value);
+function examplePostRequest() {
+    var testObject = {
+        'name': 'This is some arbitrary JSON object',
+        'info': 'Can contain anything'
+    };
+    console.log('Sending: ' + testObject + ' to the server')
+    $.ajax({
+        'method': 'POST',
+        'url': serverUrl + 'upload_csv',
+        'header': 'application/json',
+        'data': testObject
+    }).then(function successCallback(res) {
+        console.log('Successfully received' + res.name + 'from the server')
+    }, function errorCallback(res) {
+        console.log('Error: ' + res.data)
     });
-    console.log(outputRow);
 }
 
-function checkHeaders(csvRow,userInput) {
+function checkHeaders(csvRow, userInput) {
     var allClear = true;
-    var splitLeft = userInput.split("{{").length-1;
-    var splitRight = userInput.split("}}").length-1;
-    if (splitLeft != csvRow.length ||splitRight  != csvRow.length) {
+    var splitLeft = userInput.split("{{").length - 1;
+    var splitRight = userInput.split("}}").length - 1;
+    if (splitLeft != csvRow.length || splitRight != csvRow.length) {
         allClear = false;
     }
-    $.each(csvRow,function(index,value){
-        var tempString = "{{"+value+"}}";
-        if(!userInput.includes(tempString)){
+    $.each(csvRow, function (index, value) {
+        var tempString = "{{" + value + "}}";
+        if (!userInput.includes(tempString)) {
             allClear = false;
         }
     });
