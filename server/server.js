@@ -28,8 +28,7 @@ app.post('/upload_csv', function (req, res, next) {
     userInput = userInputBuf.toString();
     console.log(csv);
     console.log(userInput);
-    console.log(checkHeaders(getHeaders(csv, userInput), userInput));
-    res.send(csv);
+    res.send(checkHeaders(getHeaders(csv, userInput), userInput));
 });
 
 app.post('/*', upload.array(), function(req, res, next) {
@@ -93,6 +92,7 @@ function checkHeaders(csvRow, userInput) {
             allClear = false;
         }
     }
+    console.log(allClear);
     return allClear;
 }
 

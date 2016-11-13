@@ -115,7 +115,7 @@ function postInputCsv(data, text) {
         'header': 'application/json',
         'data': { csv: data, userInput: text }
     }).then(function successCallback(res) {
-        console.log('Successfully received' + res.name + 'from the server')
+        console.log('Successfully received' + res + 'from the server')
     }, function errorCallback(res) {
         console.log('Error: ' + res.data)
     });
