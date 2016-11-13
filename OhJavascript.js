@@ -107,11 +107,13 @@ function testServer() {
 
 function postInputCsv(data, text) {
     console.log('Sending: ' + data + ' to the server')
+    var url = serverUrl + 'upload_csv';
+    console.log(url);
     $.ajax({
         'method': 'POST',
-        'url': serverUrl + 'upload_csv',
+        'url': url,
         'header': 'application/json',
-        'data': data,text
+        'data': { csv: data, userInput: text }
     }).then(function successCallback(res) {
         console.log('Successfully received' + res.name + 'from the server')
     }, function errorCallback(res) {
@@ -147,22 +149,6 @@ function examplePostRequest() {
     }, function errorCallback(res) {
         console.log('Error: ' + res.data)
     });
-}
-
-function checkHeaders(csvRow, userInput) {
-    var allClear = true;
-    var splitLeft = userInput.split("{{").length - 1;
-    var splitRight = userInput.split("}}").length - 1;
-    if (splitLeft != csvRow.length || splitRight != csvRow.length) {
-        allClear = false;
-    }
-    $.each(csvRow, function (index, value) {
-        var tempString = "{{" + value + "}}";
-        if (!userInput.includes(tempString)) {
-            allClear = false;
-        }
-    });
-    return allClear;
 }
 
 var isAdvancedUpload = function () {
