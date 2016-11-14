@@ -2,7 +2,6 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var multer = require('multer');
 var upload = multer();
-var csv;
 
 var app = express();
 app.use(bodyParser.json());
@@ -21,14 +20,22 @@ app.get('/*', function(req, res, next) {
 app.post('/upload_csv', function (req, res, next) {
     console.log("Received %s on /", JSON.stringify(req.body));
     //console.log(JSON.stringify(req.body.csv));
-    
+    var csvContents = [];
     var csvBuf = Buffer.from(JSON.stringify(req.body.csv), 'base64');
     var userInputBuf = Buffer.from(JSON.stringify(req.body.userInput), 'base64');
-    csv = csvBuf.toString();
+    var csv = csvBuf.toString();
     userInput = userInputBuf.toString();
-    console.log(csv);
-    console.log(userInput);
-    res.send(checkHeaders(getHeaders(csv, userInput), userInput));
+    //console.log(csv);
+    console.log("asdfasdfasdfasdfasdfasdf"+userInput);
+    var inputIsValid = false;
+    var headers = getHeaders(csv);
+    inputIsValid = checkHeaders(headers, userInput);
+    res.send(inputIsValid);
+    if(inputIsValid)
+    {
+        csvContents = convertToArray(csv);
+        prepareSMS(headers, csvContents, userInput);
+    }
 });
 
 app.post('/*', upload.array(), function(req, res, next) {
@@ -42,6 +49,24 @@ var server = app.listen(8001, function() {
 	console.log("Started at http://%s:%s", host, port);
 });
 
+function convertToArray(csv)
+{
+    var index = 0;
+    var prevIndex = 0;
+    var csvRow;
+    var csvContents = [];
+    while (csv.indexOf("\r\n", index) != -1) {
+        prevIndex = index;
+        index = csv.indexOf("\r\n", index);
+        //console.log(csv.indexOf("\r\n", index) + "index = " + index);
+        csvRow = csv.substring(prevIndex, index);
+        csvContents.push(csvRow.split(","));
+        index+=2;
+    }
+    //console.log(csvContents);
+    return csvContents;
+}
+
 function getHeaders(csv, userInput) {
     var endIndex = csv.indexOf("\r\n");
     var headerString = csv.substring(0, endIndex);
@@ -50,32 +75,21 @@ function getHeaders(csv, userInput) {
     return headerArray;
 }
 
-function parseInput(data) {
-    var headers = [];
-    var userInput = getText();
-    $.each(data, function (index, value) {
-        if (index == 0) {
-            if (!checkHeaders(value, userInput)) {
-                console.log("User input does not match csv headers");
-                return false;
-            }
-            headers = value;
+function prepareSMS(headers, csvContents, userInput) {
+    var smsContents = [];
+    var outputRow;
+    var csvRow;
+    for (i = 1; i < csvContents.length; i++) {
+        outputRow = userInput;
+        csvRow = csvContents[i];
+        for (j = 0; j < csvRow.length; j++) {
+            var tempString = "{{" + headers[j] + "}}";
+            outputRow = outputRow.replace(tempString, csvRow[j]);
         }
-        if (index > 0) {
-            console.log(value);
-            //replacePlaceHolders(headers, value, userInput);
-            //makeApiCall(replacePlaceHolders(headers,data,userInput));
-        }
-    });
-}
-
-function replacePlaceHolders(header, csvRow, userInput) {
-    outputRow = userInput;
-    $.each(csvRow, function (index, value) {
-        var tempString = "{{" + header[index] + "}}";
-        outputRow = outputRow.replace(tempString, value);
-    });
-    console.log(outputRow);
+        smsContents.push(outputRow);
+    }
+    console.log(smsContents);
+    return smsContents;
 }
 
 function checkHeaders(csvRow, userInput) {
@@ -87,7 +101,7 @@ function checkHeaders(csvRow, userInput) {
     }
     for(i=0;i<csvRow.length;i++) {
         var tempString = "{{" + csvRow[i] + "}}";
-        console.log("index[" + i + "] = " + tempString);
+        //console.log("index[" + i + "] = " + tempString);
         if (!userInput.includes(tempString)) {
             allClear = false;
         }
