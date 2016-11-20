@@ -1,7 +1,10 @@
+var twilio_sid = 'AC6939ff6db7387f4cd95a4a4105f0c3f1';
+var twilio_authToken = '1109724bc9f336573b458f850338b0ac';
 var express = require('express');
 var bodyParser = require('body-parser');
 var multer = require('multer');
 var upload = multer();
+var twilio = require('twilio');
 
 var app = express();
 app.use(bodyParser.json());
@@ -12,9 +15,10 @@ app.use(function(req, res, next) {
 	next();
 });
 
-app.get('/*', function(req, res, next) {
-	console.log('GET on /');
-	res.send('Wassup fam');
+app.get('/text/teo', function(req, res, next) {
+	var client = new twilio.RestClient(twilio_sid, twilio_authToken);
+	console.log('sending text....');
+	makeApiCall(client, '+18557128987', '+14167384300', 'this is a message');  
 });
 
 app.post('/upload_csv', function (req, res, next) {
@@ -38,6 +42,11 @@ app.post('/upload_csv', function (req, res, next) {
     }
 });
 
+
+app.get('/*', function(req, res, next) {
+	console.log('GET on /');
+	res.send('Wassup fam');
+});
 app.post('/*', upload.array(), function(req, res, next) {
 	console.log("Received %s on /", JSON.stringify(req.body));
 	res.send(req.body);
@@ -110,6 +119,15 @@ function checkHeaders(csvRow, userInput) {
     return allClear;
 }
 
-function makeApiCall() {
+function makeApiCall(client, from_number, to_number, message) {
 
+	client.messages.create({
+		body: message,
+		to: to_number,// Text this number
+		from: from_number,// From a valid Twilio number
+	}, function(err, message) {
+		if(err) {
+			console.error(err);
+		}
+	});
 }
