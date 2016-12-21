@@ -1,5 +1,6 @@
 var availableTags = ["name", "price", "appointment-time", "dank"];
 var serverUrl = 'http://localhost:8001/'
+var lastBox = "box";
 $(document).ready(function () {
     $("#raw").focusin(function () {
         document.getElementById("raw").style.opacity = 100;
@@ -10,13 +11,13 @@ $(document).ready(function () {
     });
     $("#input_file").bind('change', handleFileUpload);
 
-    var obj = $(".box");
+    var obj = $("."+lastBox);
     var counter = 0;
     obj.on('dragenter', function (e) {
         e.stopPropagation();
         e.preventDefault();
         counter++;
-        $(this).switchClass('box', 'box_is_dragover');
+        $(this).removeClass().addClass('box_is_dragover');
     });
     obj.on('dragover', function (e) {
         e.stopPropagation();
@@ -26,18 +27,15 @@ $(document).ready(function () {
         e.preventDefault();
         counter--;
         if (counter == 0) {
-            $(this).switchClass('box_is_dragover', 'box');
+            $(this).removeClass().addClass(lastBox);
+            console.log("dragleave")
         }
     });
     obj.on('drop', function (e) {
         e.stopPropagation();
         e.preventDefault();
-        $(this).switchClass('box_is_dragover', 'box');
+        $(this).removeClass().addClass('box');
         storeCSV(e.originalEvent.dataTransfer.files);
-        
-        //console.log(csv);
-        //sessionStorage.setItem("csv", csv);
-        //getCSV(sessionStorage.getItem("csv")), getText();
     });
     $(document).on('dragenter', function (e) {
         e.stopPropagation();
@@ -62,11 +60,13 @@ function storeCSV(files)
 {
     var file = files[0];
     var reader = new FileReader();
+    sessionStorage.clear();
     reader.readAsText(file);
     reader.onload = function (event) {
         var csv = event.target.result;
         sessionStorage.setItem("csv", csv);
         console.log(sessionStorage.getItem("csv"));
+        validateCSV();
     }
 }
 
@@ -88,9 +88,16 @@ function gimmeThatColorPLZ(tagToTryTY) {
 }
 
 function validateCSV() {
-    var input_Csv = window.btoa(sessionStorage.getItem("csv"));
-    var input_Text = window.btoa(getText());
-    postInputCsv(input_Csv, input_Text);
+    try{
+        var input_Csv = window.btoa(sessionStorage.getItem("csv"));
+        var input_Text = window.btoa(getText());
+        postInputCsv(input_Csv, input_Text);
+    } catch (e) {
+        $('.' + lastBox).removeClass().addClass('box_invalid');
+        $("#sendButton").prop("disabled", true)
+        lastBox = "box_invalid";
+    }
+
 }
 
 function getText() {
@@ -116,8 +123,31 @@ function postInputCsv(data, text) {
         'data': { csv: data, userInput: text }
     }).then(function successCallback(res) {
         console.log('Successfully received' + res + 'from the server')
+        if (res == true) {
+            $('.' + lastBox).removeClass().addClass('box_valid');
+            lastBox = "box_valid";
+            $("#sendButton").prop("disabled", false);
+        }
+        else {
+            $('.' + lastBox).removeClass().addClass('box_invalid');
+            $("#sendButton").prop("disabled", true)
+            lastBox = "box_invalid";
+            console.log("false");
+            //$('.box').css('background-color', 'red');
+        }
     }, function errorCallback(res) {
         console.log('Error: ' + res.data)
+    });
+}
+
+function sendSMS() {
+    var sid = $('#SID').val();
+    var authToken = $('#authToken').val();
+    $.ajax({
+        'method': 'POST',
+        'url': serverUrl + 'sendText',
+        'header': 'application/json',
+        'data': { SID: sid, authToken: authToken }
     });
 }
 
