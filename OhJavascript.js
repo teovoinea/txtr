@@ -28,7 +28,6 @@ $(document).ready(function () {
         counter--;
         if (counter == 0) {
             $(this).removeClass().addClass(lastBox);
-            console.log("dragleave")
         }
     });
     obj.on('drop', function (e) {
@@ -65,7 +64,6 @@ function storeCSV(files)
     reader.onload = function (event) {
         var csv = event.target.result;
         sessionStorage.setItem("csv", csv);
-        console.log(sessionStorage.getItem("csv"));
         validateCSV();
     }
 }
@@ -102,27 +100,17 @@ function validateCSV() {
 
 function getText() {
     var input = $(".textarea#converted").text();
-    console.log("input:" + input);
     return input;
 }
 
-function testServer() {
-    exampleGetRequest();
-    examplePostRequest();
-    //console.log('we clicked fam');
-}
-
 function postInputCsv(data, text) {
-    console.log('Sending: ' + data + ' to the server')
     var url = serverUrl + 'upload_csv';
-    console.log(url);
     $.ajax({
         'method': 'POST',
         'url': url,
         'header': 'application/json',
         'data': { csv: data, userInput: text }
     }).then(function successCallback(res) {
-        console.log('Successfully received' + res + 'from the server')
         if (res == true) {
             $('.' + lastBox).removeClass().addClass('box_valid');
             lastBox = "box_valid";
@@ -132,7 +120,6 @@ function postInputCsv(data, text) {
             $('.' + lastBox).removeClass().addClass('box_invalid');
             $("#sendButton").prop("disabled", true)
             lastBox = "box_invalid";
-            console.log("false");
             //$('.box').css('background-color', 'red');
         }
     }, function errorCallback(res) {
@@ -148,18 +135,6 @@ function sendSMS() {
         'url': serverUrl + 'sendText',
         'header': 'application/json',
         'data': { SID: sid, authToken: authToken }
-    });
-}
-
-function exampleGetRequest() {
-    $.ajax({
-        'method': 'GET',
-        'url': serverUrl + 'user_info',
-        'header': 'application/json'
-    }).then(function successCallback(res) {
-        console.log('Successfully received' + res + 'from the server')
-    }, function errorCallback(res) {
-        console.log('Error: ' + res)
     });
 }
 

@@ -1,5 +1,5 @@
-var twilio_sid;// = "AC6939ff6db7387f4cd95a4a4105f0c3f1";
-var twilio_authToken;// = '1109724bc9f336573b458f850338b0ac';
+var twilio_sid;
+var twilio_authToken;
 var express = require('express');
 var bodyParser = require('body-parser');
 var multer = require('multer');
@@ -18,41 +18,30 @@ app.use(function(req, res, next) {
 	next();
 });
 
-app.get('/text/teo', function(req, res, next) {
-	var client = new twilio.RestClient(twilio_sid, twilio_authToken);
-	console.log('sending text....');
-	makeApiCall(client, '+18557128987', '+17782236223', 'this is a message');
-	//makeApiCall(client, '+18557128987', '+14167384300', 'this is a message');  
-});
-
 app.post('/sendText', function (req, res, next) {
+    var response = "SMS sent successfully";
     twilio_sid = JSON.parse(JSON.stringify(req.body.SID));
     twilio_authToken = JSON.parse(JSON.stringify(req.body.authToken));
-    console.log("sid = " + twilio_sid);
-    console.log("authToken = " + twilio_authToken);
     var client = new twilio.RestClient(twilio_sid, twilio_authToken);
     console.log('sending text....');
-    console.log(smsContents.length);
     for (i = 0; i < smsContents.length; i++) {
-        console.log("sendText");
-        makeApiCall(client, "+"+from[i], "+"+to[i], smsContents[i]);
+        try{
+            makeApiCall(client, "+"+from[i], "+"+to[i], smsContents[i]);
+        }catch(e){
+            response = "SMS failed to be sent";
+        }
     }
+    res.send(response);
 });
 
 app.post('/upload_csv', function (req, res, next) {
     console.log("Received %s on /", JSON.stringify(req.body));
-    //console.log(JSON.stringify(req.body.csv));
     clearArrays();
-    console.log(smsContents);
-    console.log(to);
-    console.log(from);
     var csvContents = [];
     var csvBuf = Buffer.from(JSON.stringify(req.body.csv), 'base64');
     var userInputBuf = Buffer.from(JSON.stringify(req.body.userInput), 'base64');
     var csv = csvBuf.toString();
     userInput = userInputBuf.toString();
-    //console.log(csv);
-    console.log(userInput);
     var inputIsValid = false;
     var headers = getHeaders(csv);
     inputIsValid = checkHeaders(headers, userInput);
@@ -95,12 +84,10 @@ function convertToArray(csv)
     while (csv.indexOf("\r\n", index) != -1) {
         prevIndex = index;
         index = csv.indexOf("\r\n", index);
-        //console.log(csv.indexOf("\r\n", index) + "index = " + index);
         csvRow = csv.substring(prevIndex, index);
         csvContents.push(csvRow.split(","));
         index+=2;
     }
-    //console.log(csvContents);
     return csvContents;
 }
 
@@ -108,7 +95,6 @@ function getHeaders(csv, userInput) {
     var endIndex = csv.indexOf("\r\n");
     var headerString = csv.substring(0, endIndex);
     var headerArray = headerString.split(",");
-    console.log(headerArray);
     return headerArray;
 }
 
@@ -126,31 +112,24 @@ function prepareSMS(headers, csvContents, userInput) {
         }
         smsContents.push(outputRow);
     }
-    console.log("smscontents"+smsContents);
 }
 
 function checkHeaders(csvRow, userInput) {
     var allClear = true;
     var splitLeft = userInput.split("{{").length - 1;
-    console.log(splitLeft);
     var splitRight = userInput.split("}}").length - 1;
-    console.log(splitRight);
     if (splitLeft != csvRow.length - 2 || splitRight != csvRow.length - 2) {
-        console.log("failed here1 csvRow.length = "+csvRow.length+" csvRow = "+csvRow);
         allClear = false;
     }
     if (csvRow[0].toLowerCase() == "from" && csvRow[1].toLowerCase() == "to") {
         for(i=2;i<csvRow.length;i++) {
             var tempString = "{{" + csvRow[i] + "}}";
-            //console.log("index[" + i + "] = " + tempString);
             if (!userInput.includes(tempString)) {
-                console.log("failed here2");
                 allClear = false;
             }
         }
     }
     else {
-        console.log("failed here3");
         allClear = false;
     }
     return allClear;
