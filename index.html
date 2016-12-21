@@ -38,6 +38,13 @@
                     <div class="panel-heading">Example of Sms a Recipe</div>
                     <div class="panel-body">
                         <div style="width:100%px; height:100px; position:relative;">
+                            <textarea contenteditable="true" class="textarea" id="SID" placeholder="Enter Twillio SID"></textarea>
+                        </div>
+                        <div style="width:100%px; height:100px; position:relative;">
+                            <textarea contenteditable="true" class="textarea" id="authToken" placeholder="Enter Authentication Token"></textarea>
+                        </div>
+                        <div style="width:100%px; height:100px; position:relative;">
+
                             <div class="textarea" id="converted">hi <span class="bubble"><span class="invisible">{{</span>name<span class="invisible">}}</span></span>! This is a demo of our <span class="bubble"><span class="invisible">{{</span>dank<span class="invisible">}}</span></span> platform. It will cost <span class="bubble"><span class="invisible">{{</span>price<span class="invisible">}}</span></span></div>
                             <div contenteditable="true" class="textarea" id="raw" style="opacity:0;">hi {{name}}! This is a demo of our {{dank}} platform. It will cost {{price}}</div>
                         </div>
@@ -52,18 +59,7 @@
                             <div class="box__error">Error! <span></span>.</div>
                         </form>
                         <br>
-                        <a href="http://instantcena.com"><button type="button" class="btn btn-success" style="width:100%;" onclick="getText()">Press That Success Button</button></a>
-                        <button type="button" class="btn btn-primary" onClick="testServer()"> Test the server </button>
-                        <button type="button" class="btn btn-primary" onClick="validateCSV()"> Validate Input </button>
-                        <form><input type="file" id="input_file" accept=".csv" name="files[]" style="width:100%;"></form>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-4 col-md-6 col-lg-7">
-                <div class="panel panel-default">
-                    <div class="panel-heading">John Cena</div>
-                    <div class="panel-body">
-                        <img src="cena.jpg" style="width:100%;" />
+                        <button type="button" class="btn btn-primary" id = "sendButton" onClick="sendSMS()" disabled> Send SMS </button>
                     </div>
                 </div>
             </div>
