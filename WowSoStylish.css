@@ -61,6 +61,30 @@ body{
     text-align:center;
 }
 
+.box_valid {
+    border:2px dotted;
+    border-radius: 4px!important;
+    height: 100px;
+    overflow: auto;
+    padding: 2px;
+    position: relative;
+    background-color:lawngreen;
+    width: 100%;
+    text-align:center;
+}
+
+.box_invalid {
+    border:2px dotted;
+    border-radius: 4px!important;
+    height: 100px;
+    overflow: auto;
+    padding: 2px;
+    position: relative;
+    background-color:red;
+    width: 100%;
+    text-align:center;
+}
+
 label>strong:hover{
     color: dodgerblue;
 }
