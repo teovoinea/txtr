@@ -104,35 +104,51 @@ function prepareSMS(headers, csvContents, userInput) {
     for (i = 1; i < csvContents.length; i++) {
         outputRow = userInput;
         csvRow = csvContents[i];
-        from.push(csvRow[0]);
-        to.push(csvRow[1]);
-        for (j = 2; j < csvRow.length; j++) {
-            var tempString = "{{" + headers[j] + "}}";
-            outputRow = outputRow.replace(tempString, csvRow[j]);
+        for (j = 0; j < csvRow.length; j++) {
+            if (headers[j] == "from"){
+                from.push(csvRow[j]);
+            }
+            else if (headers[j] == "to") {
+                to.push(csvRow[1]);
+            }
+            else {
+                var tempString = "{{" + headers[j] + "}}";
+                outputRow = outputRow.replace(tempString, csvRow[j]);
+            }
         }
         smsContents.push(outputRow);
     }
 }
 
+//make this return true
 function checkHeaders(csvRow, userInput) {
     var allClear = true;
+    var hasFrom = false;
+    var hasTo = false;
     var splitLeft = userInput.split("{{").length - 1;
     var splitRight = userInput.split("}}").length - 1;
     if (splitLeft != csvRow.length - 2 || splitRight != csvRow.length - 2) {
         allClear = false;
     }
-    if (csvRow[0].toLowerCase() == "from" && csvRow[1].toLowerCase() == "to") {
-        for(i=2;i<csvRow.length;i++) {
-            var tempString = "{{" + csvRow[i] + "}}";
-            if (!userInput.includes(tempString)) {
+    
+    for (i = 0; i < csvRow.length; i++) {
+        if (csvRow[i].toLowerCase() == "from") {
+            hasFrom = true;
+        }
+        else if(csvRow[i].toLowerCase() == "to"){
+            hasTo = true;
+        }
+        else{
+            var tempString = "{{" + csvRow[i].toLowerCase() + "}}";
+            if (!userInput.toLowerCase().includes(tempString)) {
                 allClear = false;
             }
         }
     }
-    else {
-        allClear = false;
-    }
-    return allClear;
+    console.log("hasFrom = " + hasFrom + "\n");
+    console.log("hasTo = " + hasTo + "\n");
+    console.log("allClear = " + allClear + "\n");
+    return allClear&&hasFrom&&hasTo;
 }
 
 function makeApiCall(client, from_number, to_number, message) {
