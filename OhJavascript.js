@@ -1,4 +1,3 @@
-var availableTags = ["name", "price", "appointment-time", "sweet"];
 var serverUrl = 'http://ec2-35-166-174-199.us-west-2.compute.amazonaws.com:8001/'
 var lastBox = "box";
 $(document).ready(function () {
@@ -72,17 +71,9 @@ function prettifyPLZ(someDopeText) {
     var daUltimateRegex = /{{[a-zA-Z0-9.-]{1,30}}}/g;
     var arrayOfSweetMatches;
     while (arrayOfSweetMatches = daUltimateRegex.exec(someDopeText)) {
-        someDopeText = someDopeText.replace(arrayOfSweetMatches[0], "<span class=\"" + gimmeThatColorPLZ(arrayOfSweetMatches[0].slice(2, -2)) + "\"><span class=\"invisible\">{{</span>" + arrayOfSweetMatches[0].slice(2, -2) + "<span class=\"invisible\">}}</span></span>");
+        someDopeText = someDopeText.replace(arrayOfSweetMatches[0], "<span class=\"bubble\"><span class=\"invisible\">{{</span>" + arrayOfSweetMatches[0].slice(2, -2) + "<span class=\"invisible\">}}</span></span>");
     }
     return someDopeText;
-}
-
-function gimmeThatColorPLZ(tagToTryTY) {
-    if (availableTags.indexOf(tagToTryTY) != -1) {
-        return "bubble";
-    } else {
-        return "bubblyRedBubble";
-    }
 }
 
 function validateCSV() {
