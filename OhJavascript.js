@@ -1,5 +1,5 @@
-var availableTags = ["name", "price", "appointment-time", "dank"];
-var serverUrl = 'http://localhost:8001/'
+var availableTags = ["name", "price", "appointment-time", "sweet"];
+var serverUrl = 'http://ec2-35-166-174-199.us-west-2.compute.amazonaws.com:8001/'
 var lastBox = "box";
 $(document).ready(function () {
     $("#raw").focusin(function () {
