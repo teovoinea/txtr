@@ -1,4 +1,4 @@
-var serverUrl = 'http://ec2-35-166-174-199.us-west-2.compute.amazonaws.com:8001/'
+var serverUrl = 'http://ec2-35-166-174-199.us-west-2.compute.amazonaws.com/'
 var lastBox = "box";
 $(document).ready(function () {
     $("#raw").focusin(function () {
